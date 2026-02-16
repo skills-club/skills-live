@@ -1,18 +1,20 @@
+import { createApiError } from "~~/server/utils/errors"
+
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
   if (!id) {
-    throw createError({ statusCode: 400, message: 'Missing repo id' })
+    throw createApiError('MISSING_REPO_ID')
   }
 
   const sql = useDb()
   const rows = await sql`
-    SELECT * FROM "skills-club".repos
+    SELECT * FROM ${REPOS_FULL_TABLE}
     WHERE id = ${id}
     LIMIT 1
   `
   const repo = rows[0]
   if (!repo) {
-    throw createError({ statusCode: 404, message: 'Repo not found' })
+    throw createApiError('REPO_NOT_FOUND')
   }
   return repo
 })
