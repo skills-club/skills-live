@@ -5,6 +5,8 @@
 export const ERROR_CODES = {
   /** 400 - Missing required parameter: repo id */
   MISSING_REPO_ID: { statusCode: 400, message: 'Missing repo id' },
+  /** 400 - Missing required parameter: path (file path in repo) */
+  MISSING_PATH: { statusCode: 400, message: 'Missing path' },
   /** 404 - Repo not found by id */
   REPO_NOT_FOUND: { statusCode: 404, message: 'Repo not found' },
   /** 400 - Missing required parameter: skill id */

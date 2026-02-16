@@ -39,6 +39,7 @@ const apiUrl = computed(() =>
 
 const { data: item, pending, error } = await useFetch<Repo | SkillRow>(apiUrl, {
   key: `detail-${type.value}-${id.value}`,
+  method: type.value === 'repo' ? 'POST' : 'GET',
 })
 
 const isRepo = computed(() => type.value === 'repo' && item.value)
@@ -138,12 +139,21 @@ const { data: contentData, pending: contentPending } = await useAsyncData(
     selectedPath.value && type.value === 'repo' && id.value
       ? `content-${id.value}-${selectedPath.value}`
       : 'content-none',
-  () =>
-    selectedPath.value && type.value === 'repo' && id.value
-      ? $fetch<{ content?: string; error?: string }>(
-          `/api/repos/${id.value}/content?path=${encodeURIComponent(selectedPath.value)}`,
-        )
-      : Promise.resolve({ content: '', error: undefined }),
+  async () => {
+    if (!selectedPath.value || type.value !== 'repo' || !id.value) {
+      return { content: '', error: undefined }
+    }
+    try {
+      return await $fetch<{ content?: string; error?: string }>(
+        `/api/repos/${id.value}/content?path=${encodeURIComponent(selectedPath.value)}`,
+      )
+    } catch (e: unknown) {
+      const err = e as { data?: { message?: string }; message?: string }
+      const message =
+        err?.data?.message ?? err?.message ?? 'Failed to load content'
+      return { content: '', error: message }
+    }
+  },
   { watch: [selectedPath, type, id] },
 )
 const fileContent = computed(() => contentData.value?.content ?? '')
