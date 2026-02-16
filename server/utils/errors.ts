@@ -1,5 +1,3 @@
-import { createError } from 'h3'
-
 /**
  * Centralized HTTP error codes and messages for API routes.
  * Use createApiError() to throw consistent errors.
