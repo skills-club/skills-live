@@ -26,8 +26,8 @@ const LinkComponent = resolveComponent('NuxtLink')
 
 const detailTo = computed(() =>
   props.type === 'repo'
-    ? `/repos/${props.item.id}`
-    : `/skills/${props.item.id}`,
+    ? `/detail/repo/${props.item.id}`
+    : `/detail/skill/${props.item.id}`,
 )
 
 const articleClass = computed(() =>
