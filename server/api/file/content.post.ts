@@ -1,16 +1,21 @@
-const RAW_GITHUB = 'https://raw.githubusercontent.com'
+const GITHUB_API = 'https://api.github.com'
 
 /**
  * POST /api/file/content
  * Body: { repo: string, path: string, branch?: string }
  * repo 可为仓库 id（数字）或 owner/name；branch 不传时：id 时用库 default_branch，否则 main
- * 返回: { content: string }
+ * 通过 GitHub API 拉取 raw 文件内容，返回: { content: string }
  */
 export default defineEventHandler(async (event) => {
-  const body = await readBody<{ repo?: string; path?: string; branch?: string }>(event)
-  const repoParam = (body?.repo as string)?.trim()
-  const path = (body?.path as string)?.trim()
-  const branchParam = (body?.branch as string)?.trim()
+  let body: { repo?: string; path?: string; branch?: string } | undefined
+  try {
+    body = await readBody(event)
+  } catch {
+    body = undefined
+  }
+  const repoParam = (body?.repo != null ? String(body.repo) : '').trim()
+  const path = (body?.path != null ? String(body.path) : '').trim()
+  const branchParam = (body?.branch != null ? String(body.branch) : '').trim()
 
   if (!repoParam) {
     throw createApiError('MISSING_REPO')
@@ -24,32 +29,56 @@ export default defineEventHandler(async (event) => {
 
   const repoId = Number(repoParam)
   if (Number.isInteger(repoId) && repoId > 0) {
-    const sql = useDb()
-    const rows = await sql`
-      SELECT * FROM ${sql.unsafe(REPOS_FULL_TABLE)}
-      WHERE id = ${repoId}
-      LIMIT 1
-    `
-    const repo = rows[0] as Repo | undefined
-    if (!repo) {
-      throw createApiError('REPO_NOT_FOUND')
+    try {
+      const sql = useDb()
+      const rows = await sql`
+        SELECT * FROM ${sql.unsafe(REPOS_FULL_TABLE)}
+        WHERE id = ${repoId}
+        LIMIT 1
+      `
+      const repo = rows[0] as Repo | undefined
+      if (!repo) {
+        throw createApiError('REPO_NOT_FOUND')
+      }
+      repoSlug = repo.repo
+      branch = branchParam || repo.default_branch || 'main'
+    } catch (e: unknown) {
+      if (e && typeof (e as { statusCode?: number }).statusCode === 'number') throw e
+      const msg = e instanceof Error ? e.message : 'Database error'
+      throw createError({ statusCode: 500, message: msg })
     }
-    repoSlug = repo.repo
-    branch = branchParam || repo.default_branch || 'main'
   } else {
     repoSlug = repoParam
     branch = branchParam || 'main'
   }
 
-  const url = `${RAW_GITHUB}/${repoSlug}/${branch}/${path}`
+  const [owner, repoName] = repoSlug.split('/')
+  if (!owner || !repoName) {
+    throw createError({ statusCode: 400, message: 'Invalid repo format, use owner/name' })
+  }
+
+  const apiPath = path.split('/').map(encodeURIComponent).join('/')
+  const url = `${GITHUB_API}/repos/${owner}/${repoName}/contents/${apiPath}?ref=${encodeURIComponent(branch)}`
+
+  const token = process.env.GITHUB_TOKEN
+  const headers: Record<string, string> = {
+    'User-Agent': 'GitHub-Skills-Viewer',
+    Accept: 'application/vnd.github.raw',
+  }
+  if (token) headers.Authorization = `Bearer ${token}`
 
   try {
-    const content = await $fetch<string>(url, { responseType: 'text' })
+    const content = await $fetch<string>(url, {
+      responseType: 'text',
+      headers,
+      timeout: 15000,
+    })
     return { content }
   } catch (e: unknown) {
-    const err = e as { statusCode?: number }
-    const statusCode = err?.statusCode ?? 500
+    const err = e as { status?: number; statusCode?: number; message?: string }
+    const statusCode = err?.status ?? err?.statusCode ?? 500
     if (statusCode === 404) throw createApiError('FILE_NOT_FOUND')
-    throw createError({ statusCode, message: 'Failed to fetch file content' })
+    const message = err?.message ?? 'Failed to fetch file content'
+    throw createError({ statusCode, message })
   }
 })

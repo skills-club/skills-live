@@ -87,6 +87,7 @@ watch(
   { immediate: true },
 )
 
+/** 点击文件后通过接口拉取内容：raw.githubusercontent.com/${owner}/${repo}/${defaultBranch}/${file.path} */
 const { data: contentData, pending: contentPending } = await useAsyncData(
   () =>
     selectedPath.value && repoId.value
@@ -97,10 +98,10 @@ const { data: contentData, pending: contentPending } = await useAsyncData(
       return { content: '', error: undefined }
     }
     try {
-      return await $fetch<{ content?: string; error?: string }>(
-        `/api/repos/${repoId.value}/content?path=${encodeURIComponent(selectedPath.value)}`,
-        { method: 'POST' }
-      )
+      return await $fetch<{ content?: string; error?: string }>('/api/file/content', {
+        method: 'POST',
+        body: { repo: repoId.value, path: selectedPath.value },
+      })
     } catch (e: unknown) {
       const err = e as { data?: { message?: string }; message?: string }
       const message =
