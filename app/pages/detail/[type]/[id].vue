@@ -4,15 +4,8 @@ import type { SkillRow } from '#shared/types/skill'
 import type { SkillsGetResponse } from '#shared/types/skill'
 import {
   Calendar,
-  RefreshCw,
-  Upload,
-  GitFork,
-  Star,
-  Eye,
-  GitBranch,
   FileText,
   FolderOpen,
-  ArrowLeft,
   ChevronRight,
   Folder,
 } from 'lucide-vue-next'
@@ -214,7 +207,7 @@ function formatSize(bytes: number): string {
         <!-- 左：Repo 为 skills 树，Skill 为详情卡片 -->
         <ResizablePanel
           v-if="isRepo"
-          :default-size="15"
+          :default-size="18"
           :min-size="10"
           class="min-w-0 min-h-0 flex flex-col overflow-hidden"
         >
