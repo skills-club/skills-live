@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils'
-import type { SkillRow } from '../../shared/types/skill'
 import {
   Calendar,
   RefreshCw,

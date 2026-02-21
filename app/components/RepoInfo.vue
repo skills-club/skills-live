@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { Repo } from '#shared/types/repos'
 import { Star, GitFork, Eye, GitBranch } from 'lucide-vue-next'
 
 const props = defineProps<{

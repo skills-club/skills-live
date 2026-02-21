@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import { CircuitBoard, GithubIcon, SunIcon, MoonIcon } from 'lucide-vue-next'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import { useDark, useToggle } from '@vueuse/core'
 
 interface Props {
   showSearch?: boolean
