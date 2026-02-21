@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { Check, Copy } from 'lucide-vue-next'
+import MarkdownIt from 'markdown-it'
+
+const md = new MarkdownIt()
 
 definePageMeta({
   layout: 'default',
@@ -114,6 +117,9 @@ const { data: contentData, pending: contentPending } = await useAsyncData(
 const fileContent = computed(() => contentData.value?.content ?? '')
 const contentError = computed(() => contentData.value?.error)
 
+/** Preview 模式下用 markdown-it 解析后的 HTML */
+const previewHtml = computed(() => (fileContent.value ? md.render(fileContent.value) : ''))
+
 const viewMode = ref<'preview' | 'code'>('code')
 const { copy, copied } = useClipboard({ source: fileContent })
 </script>
@@ -207,9 +213,10 @@ const { copy, copied } = useClipboard({ source: fileContent })
                     {{ selectedPath }}
                   </p>
                   <TabsContent value="preview" class="mt-0 flex-1 outline-none">
-                    <div class="whitespace-pre-wrap wrap-break-word text-sm text-foreground prose prose-sm dark:prose-invert max-w-none">
-                      {{ fileContent }}
-                    </div>
+                    <div
+                      class="prose prose-sm dark:prose-invert max-w-none text-foreground wrap-break-word"
+                      v-html="previewHtml"
+                    />
                   </TabsContent>
                   <TabsContent value="code" class="mt-0 flex-1 outline-none">
                     <pre class="whitespace-pre-wrap wrap-break-word font-mono text-sm text-foreground">{{ fileContent }}</pre>
