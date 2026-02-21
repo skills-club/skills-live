@@ -13,6 +13,10 @@ export const ERROR_CODES = {
   MISSING_SKILL_ID: { statusCode: 400, message: 'Missing skill id' },
   /** 404 - Skill not found by id */
   SKILL_NOT_FOUND: { statusCode: 404, message: 'Skill not found' },
+  /** 400 - Missing required parameter: repo (owner/name or repo id) */
+  MISSING_REPO: { statusCode: 400, message: 'Missing repo' },
+  /** 404 - File not found in repo */
+  FILE_NOT_FOUND: { statusCode: 404, message: 'File not found' },
 } as const
 
 export type ErrorCode = keyof typeof ERROR_CODES

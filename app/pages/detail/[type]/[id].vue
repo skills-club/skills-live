@@ -16,7 +16,7 @@ const apiUrl = computed(() =>
 
 const { data: item, pending, error } = await useFetch<Repo | SkillRow>(apiUrl, {
   key: `detail-${type.value}-${id.value}`,
-  method: type.value === 'repo' ? 'POST' : 'GET',
+  method: 'POST',
 })
 
 const isRepo = computed(() => type.value === 'repo' && item.value)
@@ -99,6 +99,7 @@ const { data: contentData, pending: contentPending } = await useAsyncData(
     try {
       return await $fetch<{ content?: string; error?: string }>(
         `/api/repos/${repoId.value}/content?path=${encodeURIComponent(selectedPath.value)}`,
+        { method: 'POST' }
       )
     } catch (e: unknown) {
       const err = e as { data?: { message?: string }; message?: string }
