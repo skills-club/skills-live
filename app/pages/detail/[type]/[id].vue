@@ -364,7 +364,9 @@ function formatSize(bytes: number): string {
         class="w-80 shrink-0 flex flex-col min-h-0 border-l border-border bg-card overflow-hidden"
         aria-label="Sidebar"
       >
-        <div class="flex-1 min-h-0 overflow-auto p-4 text-sm text-muted-foreground" />
+        <div class="flex-1 min-h-0 overflow-auto p-4 text-sm text-muted-foreground">
+          <RepoInfo v-if="isRepo" :repo="(item as Repo)" />
+        </div>
       </aside>
       </div>
     </template>
