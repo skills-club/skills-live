@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Calendar, FileText, FolderOpen } from 'lucide-vue-next'
+import { Check, Copy } from 'lucide-vue-next'
 
 definePageMeta({
   layout: 'default',
@@ -113,6 +113,9 @@ const { data: contentData, pending: contentPending } = await useAsyncData(
 )
 const fileContent = computed(() => contentData.value?.content ?? '')
 const contentError = computed(() => contentData.value?.error)
+
+const viewMode = ref<'preview' | 'code'>('code')
+const { copy, copied } = useClipboard({ source: fileContent })
 </script>
 
 <template>
@@ -168,26 +171,52 @@ const contentError = computed(() => contentData.value?.error)
           class="min-w-0 min-h-0 flex flex-col overflow-hidden"
         >
           <template v-if="isRepo || isSkill">
-            <div class="shrink-0 border-b border-border bg-muted/30 px-4 py-2">
-              <p class="font-mono text-sm text-muted-foreground truncate" :title="selectedPath ?? ''">
-                {{ selectedPath ?? 'Select a file' }}
-              </p>
-            </div>
-            <div class="flex-1 min-h-0 overflow-auto p-4 bg-muted/30">
-              <div v-if="!selectedPath" class="text-sm text-muted-foreground">
-                Select a file from the tree to view content.
+            <Tabs v-model="viewMode" class="flex min-h-0 flex-1 flex-col gap-0">
+              <div class="shrink-0 border-b border-border bg-muted/30 px-4 py-2 flex items-center justify-between gap-3">
+                <TabsList class="h-7 w-fit rounded-md p-0.5 text-xs">
+                  <TabsTrigger value="preview" class="rounded-l-[5px] px-2.5 py-1 text-xs data-[state=active]:rounded-l-[5px]">
+                    Preview
+                  </TabsTrigger>
+                  <TabsTrigger value="code" class="rounded-r-[5px] px-2.5 py-1 text-xs data-[state=active]:rounded-r-[5px]">
+                    Code
+                  </TabsTrigger>
+                </TabsList>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  :disabled="!fileContent"
+                  :title="copied ? 'Copied' : 'Copy'"
+                  @click="copy()"
+                >
+                  <Check v-if="copied" class="size-4" />
+                  <Copy v-else class="size-4" />
+                </Button>
               </div>
-              <div v-else-if="contentPending" class="text-sm text-muted-foreground">
-                Loading…
+              <div class="flex-1 min-h-0 overflow-auto p-4 bg-muted/30">
+                <div v-if="!selectedPath" class="text-sm text-muted-foreground">
+                  Select a file from the tree to view content.
+                </div>
+                <div v-else-if="contentPending" class="text-sm text-muted-foreground">
+                  Loading…
+                </div>
+                <div v-else-if="contentError" class="text-sm text-destructive">
+                  {{ contentError }}
+                </div>
+                <template v-else>
+                  <p class="font-mono text-[10px] text-muted-foreground truncate pb-2" :title="selectedPath ?? ''">
+                    {{ selectedPath }}
+                  </p>
+                  <TabsContent value="preview" class="mt-0 flex-1 outline-none">
+                    <div class="whitespace-pre-wrap wrap-break-word text-sm text-foreground prose prose-sm dark:prose-invert max-w-none">
+                      {{ fileContent }}
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="code" class="mt-0 flex-1 outline-none">
+                    <pre class="whitespace-pre-wrap wrap-break-word font-mono text-sm text-foreground">{{ fileContent }}</pre>
+                  </TabsContent>
+                </template>
               </div>
-              <div v-else-if="contentError" class="text-sm text-destructive">
-                {{ contentError }}
-              </div>
-              <pre
-                v-else
-                class="whitespace-pre-wrap wrap-break-word font-mono text-sm text-foreground"
-              >{{ fileContent }}</pre>
-            </div>
+            </Tabs>
           </template>
           <div v-else class="min-h-0 flex-1 overflow-auto bg-muted/30 p-6">
             <p class="text-sm text-muted-foreground">
