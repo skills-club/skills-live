@@ -1,10 +1,13 @@
+import matter from 'gray-matter'
+
 const GITHUB_API = 'https://api.github.com'
 
 /**
  * POST /api/file/content
  * Body: { repo: string, path: string, branch?: string }
  * repo 可为仓库 id（数字）或 owner/name；branch 不传时：id 时用库 default_branch，否则 main
- * 通过 GitHub API 拉取 raw 文件内容，返回: { content: string }
+ * 通过 GitHub API 拉取 raw 文件内容，返回: { content: string, frontmatter?: Record<string, unknown> }
+ * .md 文件在服务端用 gray-matter 解析 frontmatter，避免浏览器端 Buffer 未定义
  */
 export default defineEventHandler(async (event) => {
   let body: { repo?: string; path?: string; branch?: string } | undefined
@@ -68,12 +71,17 @@ export default defineEventHandler(async (event) => {
   if (token) headers.Authorization = `Bearer ${token}`
 
   try {
-    const content = await $fetch<string>(url, {
+    const raw = await $fetch<string>(url, {
       responseType: 'text',
       headers,
       timeout: 15000,
     })
-    return { content }
+    const isMarkdown = path.toLowerCase().endsWith('.md')
+    if (isMarkdown) {
+      const parsed = matter(raw)
+      return { content: parsed.content, frontmatter: parsed.data, raw }
+    }
+    return { content: raw }
   } catch (e: unknown) {
     const err = e as { status?: number; statusCode?: number; message?: string }
     const statusCode = err?.status ?? err?.statusCode ?? 500

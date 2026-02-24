@@ -101,7 +101,7 @@ const { data: contentData, pending: contentPending } = await useAsyncData(
       return { content: '', error: undefined }
     }
     try {
-      return await $fetch<{ content?: string; error?: string }>('/api/file/content', {
+      return await $fetch<{ content?: string; frontmatter?: Record<string, unknown>; raw?: string; error?: string }>('/api/file/content', {
         method: 'POST',
         body: { repo: repoId.value, path: selectedPath.value },
       })
@@ -114,11 +114,35 @@ const { data: contentData, pending: contentPending } = await useAsyncData(
   },
   { watch: [selectedPath, repoId] },
 )
-const fileContent = computed(() => contentData.value?.content ?? '')
+/** 正文内容（.md 已去掉 frontmatter，供 markdown-it 解析） */
+const bodyContent = computed(() => contentData.value?.content ?? '')
+/** 原始完整内容（Code 模式展示 + 复制用） */
+const fileContent = computed(() => contentData.value?.raw ?? contentData.value?.content ?? '')
 const contentError = computed(() => contentData.value?.error)
 
-/** Preview 模式下用 markdown-it 解析后的 HTML */
-const previewHtml = computed(() => (fileContent.value ? md.render(fileContent.value) : ''))
+/** frontmatter 由服务端 gray-matter 解析，避免浏览器 Buffer 未定义 */
+const frontmatter = computed(() => contentData.value?.frontmatter ?? {})
+
+/** frontmatter 转为 key-value 数组，用于表格展示；preview 模式下 string 类型的 value 解析为 HTML */
+const frontmatterEntries = computed(() => {
+  const data = frontmatter.value
+  if (!data || Object.keys(data).length === 0) return []
+  return Object.entries(data).map(([key, val]) => {
+    const raw = formatFrontmatterValue(val)
+    const isMarkdown = typeof val === 'string' && val.length > 0
+    const valueHtml = isMarkdown ? md.render(val as string) : raw
+    return { key, value: raw, valueHtml, isHtml: isMarkdown }
+  })
+})
+
+function formatFrontmatterValue(val: unknown): string {
+  if (val == null) return ''
+  if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') return String(val)
+  if (Array.isArray(val)) return val.map((v) => (typeof v === 'object' ? JSON.stringify(v) : String(v))).join(', ')
+  return JSON.stringify(val)
+}
+
+const previewHtml = computed(() => (bodyContent.value ? md.render(bodyContent.value) : ''))
 
 const viewMode = ref<'preview' | 'code'>('code')
 const { copy, copied } = useClipboard({ source: fileContent })
@@ -198,7 +222,7 @@ const { copy, copied } = useClipboard({ source: fileContent })
                   <Copy v-else class="size-4" />
                 </Button>
               </div>
-              <div class="flex-1 min-h-0 overflow-auto p-4 bg-muted/30">
+              <div class="flex-1 min-h-0 min-w-0 overflow-x-hidden overflow-y-auto p-4 bg-muted/30">
                 <div v-if="!selectedPath" class="text-sm text-muted-foreground">
                   Select a file from the tree to view content.
                 </div>
@@ -212,13 +236,31 @@ const { copy, copied } = useClipboard({ source: fileContent })
                   <p class="font-mono text-[10px] text-muted-foreground truncate pb-2" :title="selectedPath ?? ''">
                     {{ selectedPath }}
                   </p>
-                  <TabsContent value="preview" class="mt-0 flex-1 outline-none">
+                  <TabsContent value="preview" class="mt-0 flex-1 outline-none flex min-w-0 flex-col gap-4 overflow-hidden">
                     <div
-                      class="prose prose-sm dark:prose-invert max-w-none text-foreground wrap-break-word"
+                      v-if="frontmatterEntries.length > 0"
+                      class="w-full max-w-full overflow-hidden rounded-lg border border-border"
+                    >
+                      <Table class="w-full table-fixed border-collapse [&_tr:last-child_td]:border-b-0">
+                        <TableBody>
+                          <TableRow v-for="entry in frontmatterEntries" :key="entry.key">
+                            <TableCell class="w-32 border-b border-r border-border font-mono text-xs text-muted-foreground align-top whitespace-nowrap p-2">
+                              {{ entry.key }}
+                            </TableCell>
+                            <TableCell class="border-b border-border p-2 text-sm align-top wrap-break-word min-w-0 prose prose-sm dark:prose-invert max-w-none">
+                              <span v-if="entry.isHtml" v-html="entry.valueHtml" />
+                              <span v-else>{{ entry.value }}</span>
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
+                    <div
+                      class="min-w-0 prose prose-sm dark:prose-invert max-w-none text-foreground wrap-break-word [&_pre]:whitespace-pre-wrap [&_pre]:wrap-break-word [&_code]:wrap-break-word"
                       v-html="previewHtml"
                     />
                   </TabsContent>
-                  <TabsContent value="code" class="mt-0 flex-1 outline-none">
+                  <TabsContent value="code" class="mt-0 flex-1 outline-none min-w-0 overflow-hidden">
                     <pre class="whitespace-pre-wrap wrap-break-word font-mono text-sm text-foreground">{{ fileContent }}</pre>
                   </TabsContent>
                 </template>

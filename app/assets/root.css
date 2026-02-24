@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -118,4 +119,19 @@
   body {
     @apply bg-background text-foreground font-mono;
   }
+}
+
+/* typography 使用项目主题色 */
+.prose {
+  --tw-prose-body: var(--color-foreground);
+  --tw-prose-headings: var(--color-foreground);
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-code: var(--color-foreground);
+}
+
+.prose-invert {
+  --tw-prose-invert-body: var(--color-foreground);
+  --tw-prose-invert-headings: var(--color-foreground);
+  --tw-prose-invert-links: var(--color-primary);
+  --tw-prose-invert-code: var(--color-foreground);
 }
