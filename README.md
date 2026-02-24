@@ -1,75 +1,78 @@
-# Nuxt Minimal Starter
+# 🎯 Skills Club
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+[![Agent Skills][agent-skills-badge]][agent-skills-url]
+[![AI Powered][ai-badge]][ai-url]
+[![Open Source][opensource-badge]][opensource-url]
+[![License][license-badge]][license-url]
 
-## Setup
+**[skill-club.cc](https://skill-club.cc) The best place to discover and install Agent Skills for AI coding assistants**
 
-Make sure to install dependencies:
+Skills Club is a curated marketplace for [Agent Skills](https://agentskills.io/) — reusable, shareable instructions that supercharge your AI coding tools like OpenClaw, Claude Code, and more. Browse hundreds of community-contributed skills and install them with a single command.
 
-```bash
-# npm
-npm install
+---
 
-# pnpm
-pnpm install
+## ✨ What You Can Do
 
-# yarn
-yarn install
+### 🔍 Discover Skills
+Search and browse hundreds of curated Agent Skills from the community. Find skills for:
+- Framework-specific best practices (Vue, React, Nuxt, etc.)
+- Code review and refactoring
+- Testing and debugging
+- Documentation and project setup
+- And much more...
 
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
+### ⚡ One-Command Install
+Install any skill instantly using npx:
 
 ```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+# Install a skill from the registry
+pnpm dlx skills add antfu/skills
+# or
+npx skills add antfu/skills
 ```
 
-Locally preview production build:
+## 🚀 Quick Start
 
-```bash
-# npm
-npm run preview
+### For Users
 
-# pnpm
-pnpm preview
+1. **Visit** [skill-club.cc](https://skill-club.cc)
+2. **Search** for a skill you need
+3. **Copy** the install command
+4. **Run** it in your terminal
 
-# yarn
-yarn preview
+---
 
-# bun
-bun run preview
-```
+## 🤝 Contributing
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+### Report Issues
+
+Found a broken skill? Have a feature request? [Open an issue](https://github.com/skills-club/skills-live/issues).
+
+---
+
+## 🙏 Acknowledgments
+
+- [Agent Skills](https://agentskills.io/) — The open standard for AI assistant skills
+- All the amazing skill creators in the community
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See [LICENSE](./LICENSE) for more information.
+
+---
+
+<p align="center">
+  Made for the AI coding community ❤️
+</p>
+
+<!-- Badge Links -->
+[agent-skills-badge]: https://img.shields.io/badge/Agent%20Skills-Compatible-blue?style=flat-square&logo=openai&logoColor=white
+[agent-skills-url]: https://agentskills.io/
+[ai-badge]: https://img.shields.io/badge/AI%20Powered-100%25-ff6b6b?style=flat-square&logo=openai&logoColor=white
+[ai-url]: https://openai.com/
+[opensource-badge]: https://img.shields.io/badge/Open%20Source-%E2%9D%A4%EF%B8%8F-brightgreen?style=flat-square
+[opensource-url]: https://opensource.org/
+[license-badge]: https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square
+[license-url]: https://opensource.org/licenses/MIT
