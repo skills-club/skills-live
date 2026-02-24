@@ -156,7 +156,7 @@ function formatFrontmatterValue(val: unknown): string {
 
 const previewHtml = computed(() => (bodyContent.value ? md.render(bodyContent.value) : ''))
 
-const viewMode = ref<'preview' | 'code'>('code')
+const viewMode = ref<'preview' | 'code'>('preview')
 const { copy, copied } = useClipboard({ source: fileContent })
 </script>
 
@@ -214,8 +214,8 @@ const { copy, copied } = useClipboard({ source: fileContent })
         >
           <template v-if="isRepo || isSkill">
             <Tabs v-model="viewMode" class="flex min-h-0 flex-1 flex-col gap-0">
-              <div class="shrink-0 border-b border-border bg-muted/30 px-4 py-2 flex items-center justify-between gap-3">
-                <TabsList class="h-7 w-fit rounded-md p-0.5 text-xs">
+              <div class="shrink-0 border-b border-border bg-muted/30 px-2 flex items-center justify-between gap-3">
+                <TabsList class="h-8 w-fit rounded-md p-0.5 text-xs">
                   <TabsTrigger value="preview" class="px-2.5 py-1 text-xs">
                     Preview
                   </TabsTrigger>
@@ -248,7 +248,7 @@ const { copy, copied } = useClipboard({ source: fileContent })
                   <p class="font-mono text-[10px] text-muted-foreground truncate pb-2" :title="selectedPath ?? ''">
                     {{ selectedPath }}
                   </p>
-                  <TabsContent value="preview" class="mt-0 flex-1 outline-none flex min-w-0 flex-col gap-4 overflow-hidden">
+                  <TabsContent value="preview" class="mt-0 flex-1 outline-none flex min-w-0 flex-col gap-4 overflow-hidden select-text">
                     <div
                       v-if="frontmatterEntries.length > 0"
                       class="w-full max-w-full overflow-hidden rounded-lg border border-border"
@@ -272,7 +272,7 @@ const { copy, copied } = useClipboard({ source: fileContent })
                       v-html="previewHtml"
                     />
                   </TabsContent>
-                  <TabsContent value="code" class="mt-0 flex-1 outline-none min-w-0 overflow-hidden">
+                  <TabsContent value="code" class="mt-0 flex-1 outline-none min-w-0 overflow-hidden select-text">
                     <pre class="whitespace-pre-wrap wrap-break-word font-mono text-sm text-foreground">{{ fileContent }}</pre>
                   </TabsContent>
                 </template>

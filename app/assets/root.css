@@ -114,7 +114,15 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+  }
+
+  *:focus {
+    outline: none;
+  }
+
+  *:focus-visible {
+    @apply outline-ring/50;
   }
 
   body {
@@ -142,4 +150,9 @@
 .prose pre,
 .prose pre code {
   font-size: 0.875rem;
+}
+
+/* tabpanel 点击聚焦时不显示 outline，避免闪烁线影响文本选择 */
+[role="tabpanel"]:focus {
+  outline: none;
 }
