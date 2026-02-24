@@ -256,10 +256,10 @@ const { copy, copied } = useClipboard({ source: fileContent })
                       <Table class="w-full table-fixed border-collapse [&_tr:last-child_td]:border-b-0">
                         <TableBody>
                           <TableRow v-for="entry in frontmatterEntries" :key="entry.key">
-                            <TableCell class="w-32 border-b border-r border-border font-mono text-xs text-muted-foreground align-top whitespace-nowrap p-2">
+                            <TableCell class="w-32 border-b border-r border-border font-mono text-xs text-muted-foreground align-middle whitespace-nowrap p-2">
                               {{ entry.key }}
                             </TableCell>
-                            <TableCell class="border-b border-border p-2 text-sm align-top wrap-break-word min-w-0 prose prose-sm dark:prose-invert max-w-none">
+                            <TableCell class="border-b border-border p-2 text-sm align-top wrap-break-word min-w-0 prose prose-sm dark:prose-invert max-w-none [&_p]:my-0">
                               <span v-if="entry.isHtml" v-html="entry.valueHtml" />
                               <span v-else>{{ entry.value }}</span>
                             </TableCell>
