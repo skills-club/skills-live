@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "highlight.js/styles/github.min.css";
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
@@ -134,4 +135,11 @@
   --tw-prose-invert-headings: var(--color-foreground);
   --tw-prose-invert-links: var(--color-primary);
   --tw-prose-invert-code: var(--color-foreground);
+}
+
+/* prose-sm 下 code 字体过小，设置基础大小为 14px */
+.prose code,
+.prose pre,
+.prose pre code {
+  font-size: 0.875rem;
 }
