@@ -9,19 +9,30 @@
     </div>
 
     <div v-else-if="hasResults" class="flex gap-6">
-      <!-- 左侧：Skills，一行两个 card，宽度占比大 -->
-      <section class="min-w-0 flex-4">
-        <h2 class="text-sm font-medium text-muted-foreground mb-3">
+      <!-- 左侧：Skills，虚拟列表优化性能 -->
+      <section class="min-w-0 flex-4 flex flex-col min-h-0">
+        <h2 class="text-sm font-medium text-muted-foreground mb-3 shrink-0">
           Skills
           <span v-if="skills.length" class="ml-1">({{ skills.length }})</span>
         </h2>
-        <div v-if="skills.length" class="grid grid-cols-2 gap-4">
-          <Card
-            v-for="skill in skills"
-            :key="`skill-${skill.id}`"
-            type="skill"
-            :item="skill"
-          />
+        <div v-if="skills.length" class="flex-1 min-h-0">
+          <VirtualListGrid
+            :items="skills"
+            :row-height="220"
+            height="calc(100vh - 200px)"
+            class="w-full"
+          >
+            <template #default="{ row }">
+              <div class="grid grid-cols-2 gap-4">
+                <Card
+                  v-for="skill in row"
+                  :key="`skill-${skill.id}`"
+                  type="skill"
+                  :item="skill"
+                />
+              </div>
+            </template>
+          </VirtualListGrid>
         </div>
         <p v-else class="text-sm text-muted-foreground py-8">
           No skills found for "{{ query }}"
