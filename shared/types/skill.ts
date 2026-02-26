@@ -25,6 +25,6 @@ export type SkillRow = Skill & { repo_name?: string; repo_slug?: string }
 /** GET /api/skills 响应 */
 export interface SkillsGetResponse {
   data: SkillRow[]
-  limit: number
+  limit: number | null
   offset: number
 }

@@ -22,6 +22,6 @@ export interface ReposGetQuery {
 /** GET /api/repos 响应 */
 export interface ReposGetResponse {
   data: Repo[]
-  limit: number
+  limit: number | null
   offset: number
 }

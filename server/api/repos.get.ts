@@ -4,27 +4,39 @@ type ReposGetEvent = Parameters<Parameters<typeof defineEventHandler>[0]>[0]
 export default defineEventHandler(async (event: ReposGetEvent): Promise<ReposGetResponse> => {
   const query = getQuery(event) as ReposGetQuery
   const q = (query.q as string)?.trim()
-  const limit = Math.min(Number(query.limit) || 20, 100)
-  const offset = Number(query.offset) || 0
+  const limit = query.limit != null && query.limit != undefined ? Number(query.limit) : null
+  const offset = limit != null ? Number(query.offset) || 0 : 0
 
   const sql = useDb()
   const table = sql.unsafe(REPOS_FULL_TABLE)
   const pattern = q ? `%${q}%` : null
 
-  const rows = pattern
-    ? await sql`
-        SELECT * FROM ${table}
-        WHERE name ILIKE ${pattern}
-        ORDER BY id
-        LIMIT ${limit}
-        OFFSET ${offset}
-      `
-    : await sql`
-        SELECT * FROM ${table}
-        ORDER BY id
-        LIMIT ${limit}
-        OFFSET ${offset}
-      `
+  const rows =
+    limit != null
+      ? pattern
+        ? await sql`
+            SELECT * FROM ${table}
+            WHERE name ILIKE ${pattern}
+            ORDER BY id
+            LIMIT ${limit}
+            OFFSET ${offset}
+          `
+        : await sql`
+            SELECT * FROM ${table}
+            ORDER BY id
+            LIMIT ${limit}
+            OFFSET ${offset}
+          `
+      : pattern
+        ? await sql`
+            SELECT * FROM ${table}
+            WHERE name ILIKE ${pattern}
+            ORDER BY id
+          `
+        : await sql`
+            SELECT * FROM ${table}
+            ORDER BY id
+          `
 
   return { data: rows as Repo[], limit, offset }
 })

@@ -9,38 +9,59 @@
     </div>
 
     <div v-else-if="hasResults" class="flex gap-6">
-      <!-- 左侧：Skills，一行两个 card，宽度占比大 -->
-      <section class="min-w-0 flex-4">
-        <h2 class="text-sm font-medium text-muted-foreground mb-3">
+      <!-- 左侧：Skills，虚拟列表优化性能 -->
+      <section class="min-w-0 flex-4 flex flex-col min-h-0">
+        <h2 class="text-sm font-medium text-muted-foreground mb-3 shrink-0">
           Skills
           <span v-if="skills.length" class="ml-1">({{ skills.length }})</span>
         </h2>
-        <div v-if="skills.length" class="grid grid-cols-2 gap-4">
-          <Card
-            v-for="skill in skills"
-            :key="`skill-${skill.id}`"
-            type="skill"
-            :item="skill"
-          />
+        <div v-if="skills.length" class="flex-1 min-h-0">
+          <VirtualListGrid
+            :items="skills"
+            :row-height="220"
+            height="calc(100vh - 200px)"
+            class="w-full"
+          >
+            <template #default="{ row }">
+              <div class="grid grid-cols-2 gap-4">
+                <Card
+                  v-for="skill in row"
+                  :key="`skill-${skill.id}`"
+                  type="skill"
+                  :item="skill"
+                />
+              </div>
+            </template>
+          </VirtualListGrid>
         </div>
         <p v-else class="text-sm text-muted-foreground py-8">
           No skills found for "{{ query }}"
         </p>
       </section>
 
-      <!-- 右侧：Repos，一行一个 card，宽度加宽 -->
-      <section class="w-[400px] shrink-0">
-        <h2 class="text-sm font-medium text-muted-foreground mb-3">
+      <!-- 右侧：Repos，虚拟列表优化性能 -->
+      <section class="w-[400px] shrink-0 flex flex-col min-h-0">
+        <h2 class="text-sm font-medium text-muted-foreground mb-3 shrink-0">
           Repos
           <span v-if="repos.length" class="ml-1">({{ repos.length }})</span>
         </h2>
-        <div v-if="repos.length" class="flex flex-col gap-4">
-          <Card
-            v-for="repo in repos"
-            :key="`repo-${repo.id}`"
-            type="repo"
-            :item="repo"
-          />
+        <div v-if="repos.length" class="flex-1 min-h-0">
+          <VirtualListGrid
+            :items="repos"
+            :columns="1"
+            :row-height="260"
+            height="calc(100vh - 200px)"
+            class="w-full"
+          >
+            <template #default="{ row }">
+              <Card
+                v-for="repo in row"
+                :key="`repo-${repo.id}`"
+                type="repo"
+                :item="repo"
+              />
+            </template>
+          </VirtualListGrid>
         </div>
         <p v-else class="text-sm text-muted-foreground py-8">
           No repos found for "{{ query }}"
@@ -79,10 +100,10 @@ const { data: searchData, pending, error } = useLazyAsyncData(
     if (!query.value) return { skills: [], repos: [] }
     const [reposRes, skillsRes] = await Promise.all([
       $fetch<{ data: Repo[] }>('/api/repos', {
-        query: { q: query.value, limit: 50 },
+        query: { q: query.value },
       }),
       $fetch<{ data: Skill[] }>('/api/skills', {
-        query: { q: query.value, limit: 50 },
+        query: { q: query.value },
       }),
     ])
     return {
