@@ -67,3 +67,13 @@ const containerStyle = computed(() => ({
     </div>
   </div>
 </template>
+
+<style scoped>
+.virtual-list-grid-container {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.virtual-list-grid-container::-webkit-scrollbar {
+  display: none;
+}
+</style>
