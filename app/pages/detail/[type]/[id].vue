@@ -16,6 +16,20 @@ const md = new MarkdownIt({
   },
 })
 
+// 外部链接新开 tab，并加 rel 安全属性
+const defaultOpen = md.renderer.rules.link_open ?? ((tokens, idx, options, _env, self) => self.renderToken(tokens, idx, options))
+md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
+  const token = tokens[idx]
+  if (token) {
+    const href = token.attrGet('href') ?? ''
+    if (href.startsWith('http://') || href.startsWith('https://')) {
+      token.attrSet('target', '_blank')
+      token.attrSet('rel', 'noopener noreferrer')
+    }
+  }
+  return defaultOpen(tokens, idx, options, env, self)
+}
+
 definePageMeta({
   layout: 'default',
   showSearch: true,
@@ -161,6 +175,51 @@ const previewHtml = computed(() => (bodyContent.value ? md.render(bodyContent.va
 
 const viewMode = ref<'preview' | 'code'>('preview')
 const { copy, copied } = useClipboard({ source: fileContent })
+
+/** 将相对路径解析为基于当前文件的仓库内 path（用于 .md 链接站内跳转） */
+function resolveRelativePath(relativeHref: string): string {
+  const baseDir = selectedPath.value ?? ''
+  const dir = baseDir.includes('/') ? baseDir.slice(0, baseDir.lastIndexOf('/') + 1) : ''
+  const base = `http://x/${dir}`
+  try {
+    const resolved = new URL(relativeHref, base).pathname
+    return resolved.startsWith('/') ? resolved.slice(1) : resolved
+  } catch {
+    return relativeHref
+  }
+}
+
+/** 判断是否为相对链接（非绝对 URL、非纯 fragment） */
+function isRelativeLink(href: string): boolean {
+  if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:'))
+    return false
+  if (href.startsWith('http://') || href.startsWith('https://'))
+    return false
+  return true
+}
+
+function onPreviewClick(e: MouseEvent) {
+  const a = (e.target as HTMLElement).closest('a')
+  if (!a || !a.href) return
+  const href = a.getAttribute('href')
+  if (!href) return
+  if (href.startsWith('#')) {
+    const id = href.slice(1)
+    const el = id ? document.getElementById(decodeURIComponent(id)) : null
+    if (el) {
+      e.preventDefault()
+      el.scrollIntoView({ behavior: 'smooth' })
+    }
+    return
+  }
+  if (!isRelativeLink(href)) return
+  const resolved = resolveRelativePath(href)
+  const isMd = /\.md$/i.test(resolved)
+  if (!isMd) return
+  e.preventDefault()
+  if (resolved && resolved !== selectedPath.value)
+    selectedPath.value = resolved
+}
 </script>
 
 <template>
@@ -273,6 +332,7 @@ const { copy, copied } = useClipboard({ source: fileContent })
                     <div
                       class="min-w-0 prose prose-sm dark:prose-invert max-w-none text-foreground wrap-break-word [&_pre]:whitespace-pre-wrap [&_pre]:wrap-break-word [&_code]:wrap-break-word"
                       v-html="previewHtml"
+                      @click="onPreviewClick"
                     />
                   </TabsContent>
                   <TabsContent value="code" class="mt-0 flex-1 outline-none min-w-0 overflow-hidden select-text">
