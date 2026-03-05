@@ -78,12 +78,14 @@ function formatSize(bytes: number): string {
             </p>
           </div>
         </div>
-        <p
-          v-if="item.description"
-          class="text-sm text-muted-foreground line-clamp-3"
-        >
-          {{ item.description }}
-        </p>
+        <div class="min-h-20 text-sm text-muted-foreground">
+          <p
+            v-if="item.description"
+            class="line-clamp-3"
+          >
+            {{ item.description }}
+          </p>
+        </div>
         <div
           class="grid grid-cols-3 items-center text-xs text-muted-foreground"
           role="list"

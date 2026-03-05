@@ -156,3 +156,7 @@
 [role="tabpanel"]:focus {
   outline: none;
 }
+
+html {
+  @apply overflow-hidden h-screen;
+}
