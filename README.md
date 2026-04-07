@@ -5,7 +5,7 @@
 [![Open Source][opensource-badge]][opensource-url]
 [![License][license-badge]][license-url]
 
-**[skill-club.cc](https://skill-club.cc) The best place to discover and install Agent Skills for AI coding assistants**
+**[skills-club.cc](https://skills-club.cc) The best place to discover and install Agent Skills for AI coding assistants**
 
 Skills Club is a curated marketplace for [Agent Skills](https://agentskills.io/) — reusable, shareable instructions that supercharge your AI coding tools like OpenClaw, Claude Code, and more. Browse hundreds of community-contributed skills and install them with a single command.
 
@@ -35,7 +35,7 @@ npx skills add antfu/skills
 
 ### For Users
 
-1. **Visit** [skill-club.cc](https://skill-club.cc)
+1. **Visit** [skills-club.cc](https://skills-club.cc)
 2. **Search** for a skill you need
 3. **Copy** the install command
 4. **Run** it in your terminal
